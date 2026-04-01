@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Megafuds tiene una receta (o varias) para ti 😉💚</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #62B32C; --green-dark: #4a8a1f; --green-deep: #2d5a12;
+  --green-light: #edf7e1; --green-mid: #c8e8a8;
+  --cream: #faf8f3; --cream-dark: #f0ece0;
+  --text: #1e1e1e; --text-muted: #6b6b6b;
+  --white: #ffffff; --border: #e2eed4;
+  --radius: 18px; --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+.app { max-width: 500px; margin: 0 auto; min-height: 100vh; background: var(--white); box-shadow: 0 0 60px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+.header { background: var(--green); padding: 20px 24px 18px; text-align: center; }
+.header img { height: 52px; }
+.header-sub { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; margin-top: 6px; }
+.screen { display: none; flex: 1; flex-direction: column; }
+.screen.active { display: flex; }
+.selector { padding: 28px 24px 32px; flex: 1; }
+.sel-intro { margin-bottom: 28px; }
+.sel-intro h2 { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+.sel-intro p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.sel-group { margin-bottom: 24px; }
+.sel-group-title { font-size: 11px; font-weight: 800; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.mood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mood-btn { padding: 16px 12px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--white); cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s; text-align: center; }
+.mood-btn:hover { border-color: var(--green-mid); background: var(--green-light); }
+.mood-btn.sel { border-color: var(--green); background: var(--green-light); }
+.mood-btn.sel .mood-title { color: var(--green-dark); }
+.mood-emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+.mood-title { font-size: 14px; font-weight: 800; color: var(--text); display: block; }
+.mood-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: block; }
+.time-grid { display: flex; gap: 10px; }
+.time-btn { flex: 1; padding: 14px 8px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--white); cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s; text-align: center; }
+.time-btn:hover { border-color: var(--green-mid); background: var(--green-light); }
+.time-btn.sel { border-color: var(--green); background: var(--green-light); }
+.time-btn.sel .time-label { color: var(--green-dark); }
+.time-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+.time-label { font-size: 13px; font-weight: 800; color: var(--text); display: block; }
+.time-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+.btn-main { width: 100%; padding: 16px; border-radius: var(--radius); border: none; background: var(--green); color: white; font-size: 16px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s; margin-top: 8px; }
+.btn-main:hover:not([disabled]) { background: var(--green-dark); transform: translateY(-1px); }
+.btn-main[disabled] { background: #d0d0d0; color: #a0a0a0; cursor: default; transform: none; }
+.results { padding: 0; flex: 1; overflow-y: auto; }
+.results-header { background: var(--green-light); border-bottom: 1px solid var(--border); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+.results-title { font-size: 16px; font-weight: 900; color: var(--green-deep); }
+.results-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.btn-back { background: var(--white); border: 1.5px solid var(--border); color: var(--text-muted); font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-family: 'Nunito', sans-serif; white-space: nowrap; }
+.btn-back:hover { border-color: var(--green); color: var(--green); }
+.recipe-cards { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.rcard { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 12px rgba(98,179,44,0.10); transition: all 0.2s; }
+.rcard.open { border-color: var(--green); }
+.rcard-header { padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.rcard-emoji { font-size: 32px; flex-shrink: 0; }
+.rcard-info { flex: 1; }
+.rcard-name { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.rcard-meta { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.badge-time { background: #f0f0f0; color: var(--text-muted); }
+.badge-protein { background: var(--green-light); color: var(--green-dark); }
+.rcard-arrow { font-size: 13px; color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
+.rcard.open .rcard-arrow { transform: rotate(180deg); }
+.rcard-body { display: none; padding: 0 18px 18px; border-top: 1px solid var(--border); }
+.rcard.open .rcard-body { display: block; }
+.rb-section { margin-top: 14px; }
+.rb-title { font-size: 10px; font-weight: 800; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.rb-ingr { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.rb-ingr li { font-size: 13px; color: var(--text); padding: 6px 10px; background: var(--cream); border-radius: 6px; display: flex; align-items: flex-start; gap: 6px; }
+.rb-ingr li::before { content: "•"; color: var(--green); font-weight: 800; flex-shrink: 0; }
+.rb-steps { display: flex; flex-direction: column; gap: 8px; }
+.rb-step { display: flex; gap: 10px; align-items: flex-start; }
+.rb-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: white; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.rb-step-text { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
+.rb-tip { background: var(--green-light); border-left: 3px solid var(--green); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 10px 12px; margin-top: 14px; }
+.rb-tip p { font-size: 13px; color: var(--green-deep); line-height: 1.55; font-weight: 600; }
+.results-footer { padding: 16px 20px 28px; text-align: center; }
+.btn-restart { padding: 12px 28px; border-radius: var(--radius); border: 1.5px solid var(--border); background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+.btn-restart:hover { border-color: var(--green); color: var(--green); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <img src="data:image/png;base64,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" alt="Megafuds">
+    <div class="header-sub">Megafuds tiene una receta (o varias) para ti 😉💚</div>
+  </div>
+
+  <div class="screen active" id="s1">
+    <div class="selector">
+      <div class="sel-intro">
+        <h2>¿Qué te provoca ahora? 🌱</h2>
+        <p>Elige tu antojo y el tiempo que tienes. Te mostramos 3 recetas perfectas para este momento.</p>
+      </div>
+      <div class="sel-group">
+        <div class="sel-group-title">¿Qué te provoca?</div>
+        <div class="mood-grid">
+          <button class="mood-btn" data-mood="dulce">
+            <span class="mood-emoji">🍫</span>
+            <span class="mood-title">Algo dulce</span>
+            <span class="mood-desc">Batidos, postres, snacks</span>
+          </button>
+          <button class="mood-btn" data-mood="salado">
+            <span class="mood-emoji">🥗</span>
+            <span class="mood-title">Algo salado</span>
+            <span class="mood-desc">Bowls, sopas, wraps</span>
+          </button>
+          <button class="mood-btn" data-mood="reconfortante">
+            <span class="mood-emoji">☕</span>
+            <span class="mood-title">Algo reconfortante</span>
+            <span class="mood-desc">Caliente, cremoso, nutritivo</span>
+          </button>
+          <button class="mood-btn" data-mood="refrescante">
+            <span class="mood-emoji">🌿</span>
+            <span class="mood-title">Algo refrescante</span>
+            <span class="mood-desc">Frío, ligero, energizante</span>
+          </button>
+        </div>
+      </div>
+      <div class="sel-group">
+        <div class="sel-group-title">¿Cuánto tiempo tienes?</div>
+        <div class="time-grid">
+          <button class="time-btn" data-time="5">
+            <span class="time-emoji">⚡</span>
+            <span class="time-label">5 min</span>
+            <span class="time-sub">Solo licuadora</span>
+          </button>
+          <button class="time-btn" data-time="15">
+            <span class="time-emoji">🕐</span>
+            <span class="time-label">15 min</span>
+            <span class="time-sub">Algo rápido</span>
+          </button>
+          <button class="time-btn" data-time="30">
+            <span class="time-emoji">🍳</span>
+            <span class="time-label">30 min</span>
+            <span class="time-sub">Me tomo mi tiempo</span>
+          </button>
+        </div>
+      </div>
+      <button class="btn-main" id="btn-ver" disabled>Ver mis recetas →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s2">
+    <div class="results">
+      <div class="results-header">
+        <div>
+          <div class="results-title" id="results-title"></div>
+          <div class="results-meta">3 recetas perfectas para ti ahora</div>
+        </div>
+        <button class="btn-back" id="btn-back">← Volver</button>
+      </div>
+      <div class="recipe-cards" id="recipe-cards"></div>
+      <div class="results-footer">
+        <button class="btn-restart" id="btn-restart">Buscar otra receta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var RECIPES = {"batido-energia": {"id": "batido-energia", "nombre": "Batido Explosión de Energía", "emoji": "🍓", "tiempo": "5 min", "proteina": "14-16g", "ideal": "Mañanas", "categoria": "Batido", "ingredientes": ["1 scoop Chocholisto", "1 taza fresas", "1 banano", "1 taza leche vegetal", "Hielo (opcional)", "Endulzante (opcional)"], "pasos": ["Lava las fresas. Pela y trocea el banano.", "Agrega todos los ingredientes a la licuadora.", "Licúa hasta obtener mezcla suave y homogénea.", "¡Sirve inmediatamente y disfruta!"], "tip": "El banano le da cremosidad natural — no necesita endulzante si está bien maduro."}, "smoothie-tropical": {"id": "smoothie-tropical", "nombre": "Smoothie Tropical Escape", "emoji": "🥭", "tiempo": "3 min", "proteina": "14-16g", "ideal": "Post-entreno o snack refrescante", "categoria": "Batido", "ingredientes": ["1 scoop Chocholisto", "1 taza mango congelado", "1/2 taza piña congelada", "1 taza leche de coco (recomendado)"], "pasos": ["Agrega todos los ingredientes a la licuadora.", "Licúa a alta velocidad 30-40 segundos.", "Debe quedar cremoso y sin grumos.", "Sirve y transpórtate a la playa 🏝"], "tip": "Con leche de coco queda mucho más cremoso y tropical. La fruta congelada elimina la necesidad de hielo."}, "cafe-latte": {"id": "cafe-latte", "nombre": "Café Proteico Latte", "emoji": "☕", "tiempo": "5 min", "proteina": "14-16g", "ideal": "Mañanas (doble energía)", "categoria": "Bebida", "ingredientes": ["1 scoop Chocholisto", "1 shot espresso o 1/2 taza café frío fuerte", "1 taza leche de almendras (recomendado)", "1/2 cdta canela", "Hielo", "Endulzante al gusto"], "pasos": ["Prepara el café y déjalo enfriar (o usa café frío).", "En licuadora: café + Chocholisto + leche vegetal + canela.", "Licúa 20-30 segundos hasta integrar completamente.", "Sirve sobre hielo."], "tip": "Prepara el café la noche anterior y guárdalo en la nevera — así tienes tu latte listo en 2 minutos en la mañana."}, "golden-batido": {"id": "golden-batido", "nombre": "Batido Antiinflamatorio Golden", "emoji": "🌿", "tiempo": "5 min", "proteina": "14-16g", "ideal": "Post-entreno o días de recuperación", "categoria": "Batido", "ingredientes": ["1 scoop Chocholisto", "1 taza leche vegetal", "1/2 cdta cúrcuma en polvo", "1/4 cdta jengibre fresco rallado", "1 cdta miel o sirope de agave", "Pizca de pimienta negra", "1/2 banano"], "pasos": ["Agrega todos los ingredientes a la licuadora.", "Licúa 30-40 segundos hasta completamente suave.", "La pimienta negra es clave — no se nota el sabor pero potencia los beneficios.", "Sirve y siente el poder antiinflamatorio."], "tip": "La pimienta negra aumenta la absorción de cúrcuma en un 2000%. No la omitas."}, "chocolate-cremoso": {"id": "chocolate-cremoso", "nombre": "Chocolate Cremoso", "emoji": "🍫", "tiempo": "5 min", "proteina": "14-16g", "ideal": "Snack o tarde", "categoria": "Batido", "ingredientes": ["1 scoop Chocholisto", "1 taza leche vegetal", "1-2 cdas cacao en polvo sin azúcar", "Endulzante al gusto", "1/4 cdta esencia de vainilla", "Pizca de sal marina"], "pasos": ["Agrega todos los ingredientes a la licuadora.", "Licúa 30 segundos hasta completamente integrado.", "Sírvelo frío con hielo o caliéntalo para chocolate caliente nutritivo.", "¡Disfruta sin culpa!"], "tip": "Frío es un batido. Caliente es chocolate santafereño proteico. Una receta, dos versiones."}, "bowl-guerrero": {"id": "bowl-guerrero", "nombre": "Bowl Guerrero Andino", "emoji": "🥣", "tiempo": "8 min", "proteina": "16-20g", "ideal": "Desayuno o post-entreno", "categoria": "Bowl", "ingredientes": ["1 scoop Chocholisto", "1 banano congelado en trozos", "1 taza espinaca fresca", "1/2 taza leche de almendras", "Toppings: granola, frutas frescas, coco rallado, semillas, mantequilla de almendras"], "pasos": ["En licuadora agrega banano congelado + espinaca + Chocholisto + leche vegetal.", "Licúa hasta consistencia espesa (como helado suave).", "Si está muy líquido, agrega más banano congelado.", "Vierte en un bowl y decora con tus toppings favoritos.", "Come inmediatamente con cuchara."], "tip": "No se siente la espinaca. El banano congelado la enmascara completamente. Pura nutrición disfrazada de postre."}, "avena-proteica": {"id": "avena-proteica", "nombre": "Avena Proteica Express", "emoji": "🌾", "tiempo": "10 min", "proteina": "20-24g", "ideal": "Desayuno (especialmente mañanas frías)", "categoria": "Desayuno caliente", "ingredientes": ["1/2 taza avena en hojuelas", "1 taza leche de almendras (recomendado)", "1 scoop Chocholisto", "1/2 cdta canela", "1 cdta miel o sirope de agave", "Pizca de sal", "Toppings: frutas frescas, nueces, mantequilla de maní, semillas de chía"], "pasos": ["Calienta la leche vegetal a fuego medio.", "Agrega la avena y cocina 3-5 minutos revolviendo.", "Retira del fuego y deja reposar 1 minuto.", "Agrega el Chocholisto, canela, miel y sal.", "Mezcla bien hasta integrar completamente.", "Sirve en bowl y agrega tus toppings favoritos."], "tip": "Chocholisto se agrega AL FINAL, fuera del fuego, para no desnaturalizar la proteína con el calor."}, "pancakes": {"id": "pancakes", "nombre": "Pancakes Proteicos 5 Ingredientes", "emoji": "🥞", "tiempo": "20 min", "proteina": "24-28g (toda la receta)", "ideal": "Brunch o desayuno de fin de semana", "categoria": "Desayuno caliente", "ingredientes": ["1 banano grande", "2 huevos (o 2 huevos de chía: 2 cdas chía + 6 cdas agua, reposar 10 min)", "1 scoop Chocholisto", "1/2 taza avena en hojuelas", "1 cdta polvo de hornear", "Aceite o mantequilla vegetal", "Toppings: sirope de maple, frutas, mantequilla de maní, yogurt vegetal"], "pasos": ["Machaca el banano con tenedor hasta hacer puré.", "Agrega los huevos (o huevos de chía) y mezcla bien.", "Incorpora Chocholisto, avena y polvo de hornear.", "Mezcla hasta obtener masa homogénea.", "Calienta sartén a fuego medio con aceite.", "Vierte 1/4 taza de masa por pancake.", "Cocina 2-3 minutos por lado hasta dorar.", "Sirve caliente con tus toppings favoritos."], "tip": "Perfectos para meal prep — haz el doble y congela. Calienta en tostadora en la mañana."}, "energy-balls": {"id": "energy-balls", "nombre": "Energy Balls Clásicas", "emoji": "⚡", "tiempo": "15 min + 30 min nevera", "proteina": "2-3g por ball", "ideal": "Snack o pre-entreno", "categoria": "Snack", "ingredientes": ["1 scoop Chocholisto", "1 taza dátiles Medjool sin semilla", "1/2 taza nueces o almendras", "2 cdas cacao en polvo sin azúcar", "2 cdas coco rallado + extra para cubrir", "Pizca de sal marina"], "pasos": ["En procesador, agrega nueces y pulsa hasta picar en trozos pequeños.", "Agrega dátiles, Chocholisto, cacao, coco y sal.", "Procesa hasta obtener masa pegajosa que se mantiene unida.", "Con las manos forma bolitas pequeñas.", "Rueda en coco rallado para cubrir.", "Refrigera mínimo 30 minutos antes de comer."], "tip": "Batch semanal en 15 minutos. Duran 2 semanas en nevera y 3 meses en congelador."}, "bites-mani": {"id": "bites-mani", "nombre": "Bites de Mantequilla de Maní", "emoji": "🥜", "tiempo": "10 min + 30 min nevera", "proteina": "3-4g por bite", "ideal": "Snack portátil o antojo dulce", "categoria": "Snack", "ingredientes": ["1 scoop Chocholisto", "1/2 taza mantequilla de maní natural", "1/3 taza miel o sirope de agave", "1 taza avena en hojuelas", "2 cdas semillas de chía o linaza molida", "1/4 taza chips de chocolate vegano (opcional)", "Pizca de sal"], "pasos": ["Mezcla mantequilla de maní y miel hasta suavizar.", "Agrega Chocholisto, avena, semillas y sal.", "Mezcla bien hasta integrar completamente.", "Incorpora los chips de chocolate si usas.", "Refrigera la mezcla 15-20 minutos.", "Forma bolitas con las manos.", "Refrigera mínimo 30 minutos antes de comer."], "tip": "No necesitan refrigeración obligatoria. Perfectos para llevar al trabajo o al gym."}, "hummus": {"id": "hummus", "nombre": "Hummus Proteico", "emoji": "🫘", "tiempo": "10 min", "proteina": "18-22g (toda la receta)", "ideal": "Snack, acompañamiento o spread", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto", "1 lata garbanzos cocidos (400g), escurridos", "3 cdas tahini", "2 cdas aceite de oliva", "Jugo de 1 limón", "1 diente de ajo", "1/2 cdta comino", "Sal al gusto", "3-4 cdas agua fría"], "pasos": ["Escurre y enjuaga los garbanzos.", "Procesa garbanzos, tahini, limón, ajo y comino 1 minuto.", "Agrega Chocholisto y aceite de oliva.", "Procesa añadiendo agua fría hasta lograr consistencia cremosa.", "Ajusta sal y limón al gusto.", "Sirve con aceite de oliva y paprika encima."], "tip": "El tahini y el Chocholisto juntos forman una proteína completa extraordinaria. Dura 5 días en nevera."}, "aderezo": {"id": "aderezo", "nombre": "Aderezo Proteico para Ensaladas", "emoji": "🥗", "tiempo": "3 min", "proteina": "16-18g (toda la receta)", "ideal": "Ensaladas, bowls, vegetales asados", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto", "3 cdas tahini", "Jugo de 1 limón", "1 diente de ajo pequeño", "1 cdta miel o sirope de agave", "1 cdta salsa de soya o tamari", "4-5 cdas agua fría", "Sal al gusto"], "pasos": ["En un frasco con tapa agrega todos los ingredientes.", "Agita vigorosamente hasta integrar completamente.", "Si queda muy espeso agrega agua cucharada a cucharada.", "Prueba y ajusta limón o sal.", "Vierte sobre cualquier ensalada."], "tip": "Transforma cualquier ensalada aburrida en una comida completa. Dura 1 semana en nevera."}, "sopa-zanahoria": {"id": "sopa-zanahoria", "nombre": "Sopa Crema de Zanahoria y Jengibre", "emoji": "🥕", "tiempo": "25 min", "proteina": "16-18g (2 porciones)", "ideal": "Almuerzo o cena reconfortante", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto", "4 zanahorias medianas, peladas y troceadas", "1 cebolla mediana picada", "2 dientes de ajo", "1 trozo jengibre fresco (2cm) rallado", "1 lata leche de coco (400ml)", "2 tazas caldo de verduras", "1 cdta aceite de oliva", "Sal, pimienta y cúrcuma al gusto", "Toppings: semillas de calabaza, cilantro, coco rallado"], "pasos": ["Sofríe cebolla y ajo en aceite 3-4 minutos.", "Agrega zanahoria, jengibre y cúrcuma, cocina 2 minutos más.", "Vierte caldo, tapa y cocina 15 minutos hasta que zanahoria esté blanda.", "Apaga el fuego y agrega leche de coco.", "Licúa con batidora de inmersión hasta consistencia suave.", "Deja enfriar 2 minutos, agrega Chocholisto y mezcla bien.", "Ajusta sal y sirve con toppings."], "tip": "Chocholisto se agrega fuera del fuego. La zanahoria y la leche de coco enmascaran completamente el sabor."}, "bowl-quinoa": {"id": "bowl-quinoa", "nombre": "Bowl de Quinoa con Vegetales Asados", "emoji": "🌈", "tiempo": "30 min", "proteina": "28-32g", "ideal": "Almuerzo, cena o meal prep semanal", "categoria": "Salado", "ingredientes": ["1 taza quinoa cocida", "1 scoop Chocholisto (en el aderezo)", "1 taza vegetales mixtos para asar (zucchini, pimentón, berenjena)", "1 lata garbanzos cocidos", "1 cdta aceite de oliva", "Sal, pimienta y orégano", "Aderezo proteico (ver receta)", "Toppings: aguacate, semillas de sésamo, cilantro, limón"], "pasos": ["Precalienta horno a 200°C.", "Trocea vegetales, mezcla con aceite, sal y orégano.", "Asa 20-25 minutos hasta dorar.", "Prepara el aderezo proteico mientras tanto.", "Arma el bowl: quinoa como base, vegetales asados, garbanzos.", "Agrega aguacate y toppings.", "Vierte aderezo proteico generosamente."], "tip": "Prepara el doble y tenés almuerzo para 2 días. El aderezo convierte un bowl vegetal en una comida proteica completa."}, "mousse-chocolate": {"id": "mousse-chocolate", "nombre": "Mousse de Chocolate Proteico", "emoji": "🍮", "tiempo": "15 min + 1h nevera", "proteina": "16-18g (2-3 porciones)", "ideal": "Postre o antojo nocturno", "categoria": "Postre", "ingredientes": ["1 scoop Chocholisto", "1 lata leche de coco entera (400ml), refrigerada toda la noche", "2 cdas cacao en polvo sin azúcar", "3-4 dátiles Medjool sin semilla", "1 cdta esencia de vainilla", "Pizca de sal marina", "Toppings: frutos rojos, cacao nibs, coco rallado tostado"], "pasos": ["Abre la lata de leche de coco refrigerada sin agitar — la crema sólida queda arriba.", "Saca solo la crema sólida y ponla en bowl frío.", "Procesa dátiles con 2 cdas del líquido de la lata hasta pasta suave.", "Agrega Chocholisto, cacao, vainilla y sal. Procesa hasta integrar.", "Incorpora la mezcla de cacao a la crema de coco.", "Bate con batidora eléctrica 2-3 minutos hasta consistencia mousse.", "Refrigera mínimo 1 hora. Sirve en copas con toppings."], "tip": "La lata de leche de coco debe estar refrigerada TODA la noche — ese es el secreto de la textura perfecta."}, "helado-banano": {"id": "helado-banano", "nombre": "Helado Proteico de Banano", "emoji": "🍦", "tiempo": "5 min + congelación", "proteina": "16-18g (2 porciones)", "ideal": "Postre, snack o desayuno creativo", "categoria": "Postre", "ingredientes": ["3 bananos maduros congelados en trozos (mínimo 4 horas)", "1 scoop Chocholisto", "2 cdas mantequilla de maní o almendras", "1 cdta esencia de vainilla", "Pizca de sal marina"], "pasos": ["Congela los bananos troceados mínimo 4 horas.", "En procesador agrega bananos congelados.", "Procesa 1-2 minutos raspando los lados — primero granulado, luego cremoso.", "Agrega Chocholisto, mantequilla de maní, vainilla y sal.", "Procesa 30 segundos más hasta suave.", "Sirve inmediatamente como soft serve o congela 1 hora para textura más firme."], "tip": "Variación chocolate: agrega 1 cda cacao. Variación tropical: cambia maní por leche de coco y agrega mango."}, "pudin-chia": {"id": "pudin-chia", "nombre": "Pudín de Chía Proteico", "emoji": "✨", "tiempo": "5 min + 4h reposo", "proteina": "18-20g", "ideal": "Desayuno meal prep o postre nocturno", "categoria": "Postre", "ingredientes": ["1 scoop Chocholisto", "3 cdas semillas de chía", "1.5 tazas leche vegetal", "1 cdta esencia de vainilla", "1 cdta miel o sirope de agave", "Pizca de canela", "Toppings: frutas frescas, granola, mantequilla de almendras, coco rallado"], "pasos": ["Mezcla leche vegetal + Chocholisto + vainilla + miel + canela.", "Bate bien hasta disolver completamente el Chocholisto.", "Agrega semillas de chía y mezcla vigorosamente.", "Espera 5 minutos y vuelve a mezclar (evita que la chía se agrume).", "Tapa y refrigera mínimo 4 horas o toda la noche.", "Al servir, agrega toppings."], "tip": "Prepara 4 frascos el domingo y tenés desayuno lista para toda la semana. La chía + Chocholisto dan proteína + omega-3 + fibra en un solo frasco."}, "golden-milk": {"id": "golden-milk", "nombre": "Golden Milk Proteico", "emoji": "🌙", "tiempo": "8 min", "proteina": "14-16g", "ideal": "Noche de recuperación o mañanas frías", "categoria": "Bebida caliente", "ingredientes": ["1 scoop Chocholisto", "1.5 tazas leche de coco o almendras", "1 cdta cúrcuma en polvo", "1/2 cdta canela", "1/4 cdta jengibre en polvo", "Pizca de pimienta negra", "1 cdta miel o sirope de agave", "1/2 cdta aceite de coco (opcional)"], "pasos": ["Calienta la leche vegetal a fuego medio sin hervir.", "Agrega cúrcuma, canela, jengibre, pimienta y aceite de coco.", "Mezcla bien y calienta 2-3 minutos revolviendo.", "Retira del fuego, deja reposar 1 minuto.", "Agrega Chocholisto y miel.", "Bate con batidora de mano hasta espumar.", "Sirve inmediatamente."], "tip": "La pimienta negra aumenta la absorción de cúrcuma en un 2000%. La bebida antiinflamatoria más poderosa del recetario."}, "chocolate-caliente": {"id": "chocolate-caliente", "nombre": "Chocolate Caliente Proteico", "emoji": "🫖", "tiempo": "8 min", "proteina": "14-16g", "ideal": "Noches frías o antojo de chocolate", "categoria": "Bebida caliente", "ingredientes": ["1 scoop Chocholisto", "1.5 tazas leche vegetal", "2 cdas cacao en polvo sin azúcar", "1 cdta esencia de vainilla", "Endulzante al gusto", "Pizca de sal marina", "Pizca de canela", "Pizca de cayena (opcional, versión mexicana)"], "pasos": ["Calienta leche vegetal a fuego medio sin hervir.", "Agrega cacao, vainilla, sal y canela.", "Mezcla con batidora de mano hasta disolver completamente.", "Retira del fuego, deja enfriar 1 minuto.", "Agrega Chocholisto y endulzante.", "Bate hasta espumar.", "Sirve inmediatamente."], "tip": "La cayena opcional le da un kick sutil que lo hace adictivo. Pruébalo al menos una vez."}, "wrap": {"id": "wrap", "nombre": "Wrap Proteico", "emoji": "🌯", "tiempo": "5 min", "proteina": "18-22g", "ideal": "Almuerzo rápido o snack contundente", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto (en el hummus)", "2 tortillas de trigo integral o maíz", "4 cdas hummus proteico", "1/2 aguacate en rodajas", "1/2 taza lechuga o espinaca", "1/2 taza pimentón en tiras", "1/4 taza zanahoria rallada", "Jugo de limón, sal y pimienta"], "pasos": ["Extiende 2 cdas de hummus proteico sobre cada tortilla.", "Agrega espinaca o lechuga como base.", "Distribuye pimentón, zanahoria y aguacate.", "Exprime limón encima, sal y pimienta.", "Enrolla firmemente y corta por la mitad.", "Sirve inmediatamente."], "tip": "El hummus con Chocholisto ya tiene la proteína integrada. Sin cocción, sin complicaciones."}, "pasta-salsa": {"id": "pasta-salsa", "nombre": "Pasta con Salsa Blanca Proteica", "emoji": "🍝", "tiempo": "20 min", "proteina": "22-26g", "ideal": "Almuerzo o cena reconfortante", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto", "200g pasta (integral, de lentejas o regular)", "1.5 tazas leche vegetal sin azúcar", "2 cdas harina de avena o maicena", "2 dientes de ajo", "1 cdta aceite de oliva", "Nuez moscada al gusto", "Sal y pimienta", "Levadura nutricional al gusto", "Toppings: espinaca, champiñones, tomates cherry, albahaca"], "pasos": ["Cocina la pasta según instrucciones del paquete.", "Sofríe ajo en aceite 1-2 minutos.", "Agrega leche vegetal y harina de avena, mezcla con batidora de mano.", "Cocina a fuego medio-bajo revolviendo 5-7 minutos hasta espesar.", "Retira del fuego, deja enfriar 1 minuto.", "Agrega Chocholisto, nuez moscada, levadura nutricional, sal y pimienta.", "Mezcla bien y vierte sobre la pasta.", "Sirve con toppings."], "tip": "La levadura nutricional le da ese toque cremoso y sabroso que engancha. No la omitas."}, "tortilla": {"id": "tortilla", "nombre": "Tortilla de Vegetales Proteica", "emoji": "🍳", "tiempo": "15 min", "proteina": "26-30g", "ideal": "Desayuno, almuerzo o cena rápida", "categoria": "Salado", "ingredientes": ["1 scoop Chocholisto", "3 huevos (o versión vegana: 3 cdas harina de garbanzo + 6 cdas agua + 1/2 cdta polvo hornear)", "1/2 taza espinaca fresca picada", "1/4 taza pimentón rojo en cubos", "1/4 taza cebolla morada en cubos", "1/4 taza champiñones en rodajas", "1 cdta aceite de oliva", "Sal, pimienta y orégano"], "pasos": ["Bate los huevos (o mezcla de garbanzo) con Chocholisto, sal y pimienta.", "Calienta aceite en sartén antiadherente a fuego medio.", "Sofríe cebolla y pimentón 3 minutos.", "Agrega champiñones y espinaca, cocina 2 minutos más.", "Vierte la mezcla de huevo sobre los vegetales.", "Cocina a fuego bajo tapado 4-5 minutos hasta cuajar los bordes.", "Voltea con ayuda de un plato y cocina 2 minutos más.", "Sirve caliente."], "tip": "Los vegetales pueden variar con lo que tengas en la nevera. Nunca es la misma tortilla dos veces."}};
+var COMBOS = {"dulce-5": ["batido-energia", "smoothie-tropical", "chocolate-cremoso"], "dulce-15": ["avena-proteica", "golden-milk", "chocolate-caliente"], "dulce-30": ["pancakes", "mousse-chocolate", "pudin-chia"], "salado-5": ["aderezo", "wrap", "hummus"], "salado-15": ["hummus", "tortilla", "aderezo"], "salado-30": ["bowl-quinoa", "sopa-zanahoria", "pasta-salsa"], "reconfortante-5": ["cafe-latte", "golden-batido", "chocolate-cremoso"], "reconfortante-15": ["golden-milk", "chocolate-caliente", "avena-proteica"], "reconfortante-30": ["pancakes", "sopa-zanahoria", "pasta-salsa"], "refrescante-5": ["smoothie-tropical", "batido-energia", "helado-banano"], "refrescante-15": ["bowl-guerrero", "bites-mani", "energy-balls"], "refrescante-30": ["pudin-chia", "mousse-chocolate", "wrap"]};
+var selectedMood = null;
+var selectedTime = null;
+
+var moodLabels = {dulce:'Algo dulce', salado:'Algo salado', reconfortante:'Algo reconfortante', refrescante:'Algo refrescante'};
+var timeLabels = {'5':'5 minutos', '15':'15 minutos', '30':'30 minutos'};
+
+document.querySelectorAll('.mood-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    selectedMood = this.getAttribute('data-mood');
+    document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('sel'); });
+    this.classList.add('sel');
+    checkReady();
+  });
+});
+
+document.querySelectorAll('.time-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    selectedTime = this.getAttribute('data-time');
+    document.querySelectorAll('.time-btn').forEach(function(b) { b.classList.remove('sel'); });
+    this.classList.add('sel');
+    checkReady();
+  });
+});
+
+function checkReady() {
+  var btn = document.getElementById('btn-ver');
+  if (selectedMood && selectedTime) {
+    btn.removeAttribute('disabled');
+  } else {
+    btn.setAttribute('disabled', 'disabled');
+  }
+}
+
+document.getElementById('btn-ver').addEventListener('click', function() {
+  if (!selectedMood || !selectedTime) return;
+  var key = selectedMood + '-' + selectedTime;
+  var ids = COMBOS[key] || [];
+  showResults(ids);
+});
+
+document.getElementById('btn-back').addEventListener('click', goBack);
+document.getElementById('btn-restart').addEventListener('click', function() {
+  selectedMood = null;
+  selectedTime = null;
+  document.querySelectorAll('.mood-btn, .time-btn').forEach(function(b) { b.classList.remove('sel'); });
+  document.getElementById('btn-ver').setAttribute('disabled','disabled');
+  goBack();
+});
+
+function goBack() {
+  document.getElementById('s2').classList.remove('active');
+  document.getElementById('s1').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showResults(ids) {
+  document.getElementById('results-title').textContent = moodLabels[selectedMood] + ' · ' + timeLabels[selectedTime];
+  var container = document.getElementById('recipe-cards');
+  container.innerHTML = '';
+
+  ids.forEach(function(id, idx) {
+    var r = RECIPES[id];
+    if (!r) return;
+
+    var card = document.createElement('div');
+    card.className = 'rcard';
+    card.setAttribute('data-id', id);
+
+    var ingrs = r.ingredientes.map(function(i) {
+      return '<li>' + i + '</li>';
+    }).join('');
+
+    var steps = r.pasos.map(function(p, i) {
+      return '<div class="rb-step"><div class="rb-step-num">' + (i+1) + '</div><div class="rb-step-text">' + p + '</div></div>';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="rcard-header">' +
+        '<span class="rcard-emoji">' + r.emoji + '</span>' +
+        '<div class="rcard-info">' +
+          '<div class="rcard-name">' + r.nombre + '</div>' +
+          '<div class="rcard-meta">' +
+            '<span class="badge badge-time">⏱ ' + r.tiempo + '</span>' +
+            '<span class="badge badge-protein">💪 Proteína: ' + r.proteina + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<span class="rcard-arrow">▼</span>' +
+      '</div>' +
+      '<div class="rcard-body">' +
+        '<div class="rb-section"><div class="rb-title">Ingredientes</div><ul class="rb-ingr">' + ingrs + '</ul></div>' +
+        '<div class="rb-section"><div class="rb-title">Preparación</div><div class="rb-steps">' + steps + '</div></div>' +
+        '<div class="rb-tip"><p>💡 ' + r.tip + '</p></div>' +
+      '</div>';
+
+    card.querySelector('.rcard-header').addEventListener('click', function() {
+      var isOpen = card.classList.contains('open');
+      document.querySelectorAll('.rcard').forEach(function(c) { c.classList.remove('open'); });
+      if (!isOpen) card.classList.add('open');
+    });
+
+    container.appendChild(card);
+    if (idx === 0) card.classList.add('open');
+  });
+
+  document.getElementById('s1').classList.remove('active');
+  document.getElementById('s2').classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
